@@ -1,0 +1,46 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/mirage</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark"/>
+
+
+    <!-- TextAppearances -->
+
+    <style name="AppTheme.TextAppearance" parent="@android:style/TextAppearance"/>
+
+    <style name="AppTheme.TextAppearance.White">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="AppTheme.TextAppearance.White.16sp">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="AppTheme.TextAppearance.White.16sp.Bold">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppTheme.TextAppearance.White70">
+        <item name="android:textColor">@color/white_70</item>
+    </style>
+
+    <style name="AppTheme.TextAppearance.White70.14sp">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+</resources>

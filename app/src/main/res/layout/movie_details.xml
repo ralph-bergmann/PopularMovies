@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="movie"
+            type="udacity.nanodegree.popularmovies.api.models.MoviesResponse.Movie"/>
+
+        <variable
+            name="clickHandler"
+            type="udacity.nanodegree.popularmovies.adapter.MainAdapter.ClickHandler"/>
+    </data>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                cardBackgroundColor="@{movie.colorTransparentBackground}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin_half"
+                app:cardCornerRadius="@dimen/cardview_cardCornerRadius"
+                app:contentPadding="@dimen/cardview_contentPadding">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/textView_fullTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:text="@{movie.fullTitle(context)}"
+                        android:textAlignment="viewStart"/>
+
+                    <TextView
+                        android:id="@+id/textView_genres"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@id/textView_fullTitle"
+                        android:layout_marginTop="@dimen/default_margin_half"
+                        android:text="@{movie.genres(context)}"
+                        android:textAlignment="viewStart"/>
+
+                    <RatingBar
+                        android:id="@+id/ratingBar_rating"
+                        style="@style/Base.Widget.AppCompat.RatingBar.Small"
+                        ratingStarTint="@{movie.colorTint}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@id/textView_genres"
+                        android:layout_marginTop="@dimen/default_margin_half"
+                        android:isIndicator="true"
+                        android:numStars="10"
+                        android:rating="@{movie.rating()}"
+                        android:stepSize="1.0"/>
+
+                    <TextView
+                        android:id="@+id/textView_rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@id/ratingBar_rating"
+                        android:layout_marginStart="@dimen/default_margin_half"
+                        android:layout_toEndOf="@id/ratingBar_rating"
+                        android:text="@{@string/rating(movie.rating())}"
+                        android:textAppearance="@style/AppTheme.TextAppearance.White70.14sp"/>
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                cardBackgroundColor="@{movie.colorTransparentBackground}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="@dimen/cardview_cardCornerRadius"
+                app:contentPadding="@dimen/cardview_contentPadding">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@{movie.overview}"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="@style/AppTheme.TextAppearance.White70.14sp"/>
+
+            </android.support.v7.widget.CardView>
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</layout>

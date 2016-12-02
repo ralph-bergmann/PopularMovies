@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".ui.MainActivity">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/most_popular"
+            android:checked="true"
+            android:title="@string/most_popular"/>
+        <item
+            android:id="@+id/top_rated"
+            android:title="@string/top_rated"/>
+    </group>
+</menu>

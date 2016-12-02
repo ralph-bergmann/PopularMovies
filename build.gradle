@@ -1,0 +1,63 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+ext {
+
+    configuration = [
+        package          : 'udacity.nanodegree.popularmovies',
+        buildToolsVersion: '25.0.2',
+        minSdk           : 21,
+        targetSdk        : 25,
+        compileVersion   : 25,
+        version_code     : 1,
+        version_name     : "1.0.0",
+        buildTime        : new Date().format("yyyy-MM-dd' 'HH:mm:ss' 'z"),
+    ]
+
+    libraries = [
+        butterknife          : '8.4.0',
+        dagger2              : '2.8',
+        glide                : '4.0.0-SNAPSHOT',
+        glide_integration    : '2.0.0-SNAPSHOT',
+        glide_transformations: '2.0.1',
+        gson                 : '2.8.0',
+        leakcanary           : '1.5',
+        okhttp_logging       : '3.5.0',
+        paperparcel          : '2.0.0-beta2',
+        retrofit             : '2.1.0',
+        retrofit_adapter     : '1.0.0',
+        rxjava2              : '2.0.1',
+        support              : '25.1.0',
+        support_test         : '0.5',
+        timber               : '4.5.0',
+        threetenabp          : '1.0.4',
+    ]
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.0-beta2'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0'
+        classpath 'me.tatarka:gradle-retrolambda:3.4.0'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+    }
+    repositories {
+        jcenter()
+        maven { url 'https://jitpack.io' }
+        maven { url 'http://oss.sonatype.org/content/repositories/snapshots' }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="movie"
+            type="udacity.nanodegree.popularmovies.api.models.MoviesResponse.Movie"/>
+
+        <variable
+            name="activity"
+            type="android.app.Activity"/>
+
+        <variable
+            name="clickHandler"
+            type="udacity.nanodegree.popularmovies.adapter.MainAdapter.ClickHandler"/>
+    </data>
+
+    <android.support.percent.PercentRelativeLayout
+        backgroundUrl="@{movie}"
+        activity="@{activity}"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false">
+
+        <ImageView
+            android:id="@+id/imageView_cover"
+            imageUrl="@{movie}"
+            activity="@{activity}"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_alignParentStart="true"
+            app:layout_aspectRatio="67%"
+            app:layout_heightPercent="100%"/>
+
+        <include
+            layout="@layout/movie_details"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="@dimen/default_margin"
+            android:layout_toEndOf="@+id/imageView_cover"
+            app:movie="@{movie}"/>
+
+    </android.support.percent.PercentRelativeLayout>
+
+</layout>

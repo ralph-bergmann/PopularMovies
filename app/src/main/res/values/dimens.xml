@@ -1,0 +1,16 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">@dimen/default_margin</dimen>
+    <dimen name="activity_vertical_margin">@dimen/default_margin</dimen>
+    <dimen name="fab_margin">@dimen/default_margin</dimen>
+
+    <dimen name="default_margin">16dp</dimen>
+    <dimen name="default_margin_half">8dp</dimen>
+
+    <dimen name="cardview_cardCornerRadius">4dp</dimen>
+    <dimen name="cardview_contentPadding">8dp</dimen>
+
+    <dimen name="item_movie_margin_title_top_bottom">4dp</dimen>
+    <dimen name="item_movie_margin_title_left_right">8dp</dimen>
+
+</resources>
