@@ -23,3 +23,53 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keepattributes *Annotation*,SourceFile,LineNumberTable,Exceptions,Signature
+
+# dagger
+-dontwarn dagger.android.**
+
+
+# moshi
+-keep class com.squareup.moshi.** { *; }
+-keep interface com.squareup.moshi.** { *; }
+-keep class udacity.nanodegree.popularmovies.api.models.** { *; }
+
+
+# rx
+-dontwarn rx.**
+-keep class rx.internal.util.unsafe.** { *; }
+
+
+# square okhttp3 / okio
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-keep class okhttp3.** { *; }
+-keep class sun.misc.Unsafe { *; }
+-keep interface okhttp3.** { *; }
+
+# square retrofit2
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
+
+
+# remove Timber and Log calls
+-assumenosideeffects class timber.log.Timber {
+    public static *** plant(...);
+    public static *** v(...);
+    public static *** i(...);
+    public static *** w(...);
+    public static *** d(...);
+    public static *** e(...);
+ }
+-assumenosideeffects class android.util.Log {
+    public static *** isLoggable(...);
+    public static *** v(...);
+    public static *** i(...);
+    public static *** w(...);
+    public static *** d(...);
+    public static *** e(...);
+}

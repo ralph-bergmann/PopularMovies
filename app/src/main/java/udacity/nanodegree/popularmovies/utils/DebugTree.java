@@ -1,6 +1,7 @@
 package udacity.nanodegree.popularmovies.utils;
 
-import java.util.Locale;
+import android.os.Looper;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +22,7 @@ public class DebugTree extends Timber.DebugTree {
         final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         if (stackTrace.length < 7) {
             throw new IllegalStateException(
-                    "Synthetic stacktrace didn't have enough elements: are you using proguard?");
+                "Synthetic stacktrace didn't have enough elements: are you using proguard?");
         }
 
         String className = stackTrace[6].getClassName();
@@ -35,14 +36,35 @@ public class DebugTree extends Timber.DebugTree {
         final String methodName = stackTrace[6].getMethodName();
         final int lineNumber = stackTrace[6].getLineNumber();
 
-        return String.format(Locale.ENGLISH, "%s.%s(%s:%,d)", className, methodName, fileName, lineNumber);
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(className);
+        stringBuilder.append('.');
+        stringBuilder.append(methodName);
+
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            stringBuilder.append(" [");
+            stringBuilder.append(Thread.currentThread().getName());
+            stringBuilder.append(']');
+        }
+
+        stringBuilder.append(" (");
+        stringBuilder.append(fileName);
+        stringBuilder.append(':');
+        stringBuilder.append(lineNumber);
+        stringBuilder.append(')');
+
+        return stringBuilder.toString();
     }
 
     @Override
     protected void log(int priority, String tag, String message, Throwable t) {
 
         final String prefix = createPrefix();
-        message = String.format(Locale.ENGLISH, "%s   %s", prefix, message);
+        message = new StringBuilder()
+            .append(prefix)
+            .append("  ")
+            .append(message)
+            .toString();
 
         super.log(priority, mTag, message, t);
     }

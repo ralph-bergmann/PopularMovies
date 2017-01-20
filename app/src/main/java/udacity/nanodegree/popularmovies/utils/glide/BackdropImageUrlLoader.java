@@ -13,17 +13,13 @@ import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
 
 import java.io.InputStream;
 
-import udacity.nanodegree.popularmovies.MovieApp;
-import udacity.nanodegree.popularmovies.api.models.ConfigurationResponse;
-import udacity.nanodegree.popularmovies.utils.Utils;
-
 public class BackdropImageUrlLoader extends BaseGlideUrlLoader<BackdropImage> {
 
     @NonNull private final Context ctx;
 
-    protected BackdropImageUrlLoader(@NonNull final ModelLoader<GlideUrl, InputStream> concreteLoader,
-                                     @NonNull final ModelCache<BackdropImage, GlideUrl> modelCache,
-                                     @NonNull final Context context) {
+    BackdropImageUrlLoader(@NonNull final ModelLoader<GlideUrl, InputStream> concreteLoader,
+                           @NonNull final ModelCache<BackdropImage, GlideUrl> modelCache,
+                           @NonNull final Context context) {
         super(concreteLoader, modelCache);
         this.ctx = context;
     }
@@ -34,9 +30,8 @@ public class BackdropImageUrlLoader extends BaseGlideUrlLoader<BackdropImage> {
                             final int height,
                             final Options options) {
 
-        final ConfigurationResponse.ImageConfiguration imageConfiguration =
-            ((MovieApp) ctx.getApplicationContext()).imageConfiguration;
-        return Utils.urlFor(backdropImage, width, imageConfiguration);
+//        final ConfigResponse.ImageConfig imageConfig = ((MovieApp) ctx.getApplicationContext()).imageConfig;
+        return ""; //Utils.urlFor(backdropImage, width, imageConfig);
     }
 
     @Override

@@ -7,22 +7,23 @@ import android.support.v7.graphics.Palette;
 import android.util.TypedValue;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 
 public class PaletteBitmapTranscoder implements ResourceTranscoder<Bitmap, PaletteBitmap> {
 
-    @NonNull private final Context    ctx;
     @NonNull private final BitmapPool bitmapPool;
+    private final          int        twelveDip;
 
-    public PaletteBitmapTranscoder(@NonNull final Context context) {
-        this.ctx = context;
-        this.bitmapPool = Glide.get(context).getBitmapPool();
+    PaletteBitmapTranscoder(final Context context, final Glide glide) {
+        bitmapPool = glide.getBitmapPool();
+        twelveDip = twelveDip(context);
     }
 
     @Override
-    public Resource<PaletteBitmap> transcode(final Resource<Bitmap> toTranscode) {
+    public Resource<PaletteBitmap> transcode(final Resource<Bitmap> toTranscode, final Options options) {
         final Bitmap bitmap = toTranscode.get();
         final Palette paletteFull = Palette.from(bitmap)
                                            .maximumColorCount(16)
@@ -33,7 +34,7 @@ public class PaletteBitmapTranscoder implements ResourceTranscoder<Bitmap, Palet
                    .maximumColorCount(6)
                    .clearFilters()
                    .setRegion(0,
-                              bitmap.getHeight() - twelveDip(ctx),
+                              bitmap.getHeight() - twelveDip,
                               bitmap.getWidth(),
                               bitmap.getHeight())
                    .generate();

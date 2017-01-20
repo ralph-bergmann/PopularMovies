@@ -25,14 +25,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.os.Build;
 import android.renderscript.RSRuntimeException;
+import android.support.annotation.NonNull;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapResource;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -40,68 +37,49 @@ import java.security.MessageDigest;
 import jp.wasabeef.glide.transformations.internal.FastBlur;
 import jp.wasabeef.glide.transformations.internal.RSBlur;
 
-public class BackdropImageTransformation implements Transformation<Bitmap> {
+public class BackdropImageTransformation extends BitmapTransformation {
 
     private static int    VERSION  = 1;
     private static String ID       = BackdropImageTransformation.class.getCanonicalName() + VERSION;
     private static byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-    private static int MAX_RADIUS            = 25;
+    private final Context context;
+    private final int     radius;
 
-    private Context    mContext;
-    private BitmapPool mBitmapPool;
 
-    private int mRadius;
-
-    public BackdropImageTransformation(Context context) {
-        this(context, Glide.get(context).getBitmapPool(), MAX_RADIUS);
-    }
-
-    public BackdropImageTransformation(Context context, BitmapPool pool) {
-        this(context, pool, MAX_RADIUS);
-    }
-
-    public BackdropImageTransformation(Context context, int radius) {
-        this(context, Glide.get(context).getBitmapPool(), radius);
-    }
-
-    public BackdropImageTransformation(Context context, BitmapPool pool, int radius) {
-        mContext = context.getApplicationContext();
-        mBitmapPool = pool;
-        mRadius = radius;
+    BackdropImageTransformation(Context context, int radius) {
+        this.context = context.getApplicationContext();
+        this.radius = radius;
     }
 
     @Override
-    public Resource<Bitmap> transform(final Resource<Bitmap> resource,
-                                      final int outWidth,
-                                      final int outHeight) {
+    protected Bitmap transform(@NonNull final BitmapPool pool,
+                               @NonNull final Bitmap toTransform,
+                               final int outWidth,
+                               final int outHeight) {
 
-        Bitmap source = resource.get();
-
-        int width = source.getWidth();
-        int height = source.getHeight();
+        int width = toTransform.getWidth();
+        int height = toTransform.getHeight();
         int canvasHeight = width / 2 * 3;
 
-        Bitmap bitmap = mBitmapPool.get(width, canvasHeight, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = pool.get(width, canvasHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
         paint.setFlags(Paint.FILTER_BITMAP_FLAG);
-        canvas.drawBitmap(source, new Rect(0, 0, width, height), new Rect(0, 0, width, canvasHeight), paint);
+        canvas.drawBitmap(toTransform,
+                          new Rect(0, 0, width, height),
+                          new Rect(0, 0, width, canvasHeight),
+                          paint);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            try {
-                bitmap = RSBlur.blur(mContext, bitmap, mRadius);
-            }
-            catch (RSRuntimeException e) {
-                bitmap = FastBlur.blur(bitmap, mRadius, true);
-            }
-        } else {
-            bitmap = FastBlur.blur(bitmap, mRadius, true);
+        try {
+            bitmap = RSBlur.blur(context, bitmap, radius);
+        } catch (RSRuntimeException e) {
+            bitmap = FastBlur.blur(bitmap, radius, true);
         }
 
-        canvas.drawBitmap(source, 0f, canvasHeight - height, paint);
+        canvas.drawBitmap(toTransform, 0f, canvasHeight - height, paint);
 
-        return BitmapResource.obtain(bitmap, mBitmapPool);
+        return bitmap;
     }
 
     @Override
@@ -109,7 +87,7 @@ public class BackdropImageTransformation implements Transformation<Bitmap> {
 
         messageDigest.update(ID_BYTES);
 
-        final byte[] radiusData = ByteBuffer.allocate(4).putInt(mRadius).array();
+        final byte[] radiusData = ByteBuffer.allocate(4).putInt(radius).array();
         messageDigest.update(radiusData);
     }
 }

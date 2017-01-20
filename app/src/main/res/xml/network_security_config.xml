@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">themoviedb.org</domain>
+        <pin-set expiration="2018-01-01">
+            <pin digest="SHA-256">HkCBucsA3Tgiby96X7vjb/ojHaE1BrjvZ2+LRdJJd0E=</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>

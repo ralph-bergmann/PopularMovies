@@ -19,13 +19,13 @@ public class GlideRequestBuilder {
                     .asBitmap()
                     .transition(withNoTransition())
                     .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.ALL)
-                                         .centerCrop(activity));
+                                         .centerCrop());
     }
 
     public static RequestBuilder<Bitmap> thumbnailRequest(final Activity activity) {
         return fullRequest(activity)
             .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.DATA)
-                                 .centerCrop(activity)
+                                 .centerCrop()
                                  .override(50, 75));
     }
 
@@ -34,13 +34,13 @@ public class GlideRequestBuilder {
                     .as(PaletteBitmap.class)
                     .transition(withNoTransition())
                     .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.ALL)
-                                         .centerCrop(activity));
+                                         .centerCrop());
     }
 
     public static RequestBuilder<PaletteBitmap> thumbnailRequestPalette(final Activity activity) {
         return fullRequestPalette(activity)
             .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.DATA)
-                                 .centerCrop(activity)
+                                 .centerCrop()
                                  .override(50, 75));
     }
 
@@ -51,13 +51,12 @@ public class GlideRequestBuilder {
 
     public static RequestBuilder<Bitmap> blurRequest(final Activity activity) {
         return thumbnailRequest(activity)
-            .apply(RequestOptions.bitmapTransform(activity,
-                                                  new BlurTransformation(activity, 10)));
+            .apply(RequestOptions.bitmapTransform(new BlurTransformation(activity, 10)));
     }
 
     public static RequestBuilder<Bitmap> backdropImageRequest(final Activity activity) {
         return fullRequest(activity)
-            .apply(RequestOptions.bitmapTransform(activity, new BackdropImageTransformation(activity, 250))
+            .apply(RequestOptions.bitmapTransform(new BackdropImageTransformation(activity, 250))
                                  .sizeMultiplier(0.2f)); // load smaller image to prevent OOM
     }
 }

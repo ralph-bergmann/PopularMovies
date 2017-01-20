@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/tools">
 
     <data>
 
         <variable
             name="movie"
-            type="udacity.nanodegree.popularmovies.api.models.MoviesResponse.Movie"/>
+            type="udacity.nanodegree.popularmovies.model.Movie"/>
 
         <variable
             name="activity"
@@ -19,21 +20,30 @@
     </data>
 
     <android.support.percent.PercentRelativeLayout
-        backgroundUrl="@{movie}"
-        activity="@{activity}"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false">
+        android:clipToPadding="false"
+        bind:activity="@{activity}"
+        bind:backgroundUrl="@{movie}">
 
         <ImageView
             android:id="@+id/imageView_cover"
-            imageUrl="@{movie}"
-            activity="@{activity}"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_alignParentStart="true"
             app:layout_aspectRatio="67%"
-            app:layout_heightPercent="100%"/>
+            app:layout_heightPercent="100%"
+            bind:activity="@{activity}"
+            bind:imageUrl="@{movie}"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/imageView_cover"
+            android:layout_alignEnd="@+id/imageView_cover"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@drawable/ic_play"
+            bind:fabTint="@{movie.colorTint}"/>
 
         <include
             layout="@layout/movie_details"

@@ -1,24 +1,34 @@
 package udacity.nanodegree.popularmovies.ui;
 
+import android.arch.lifecycle.LifecycleRegistry;
+import android.arch.lifecycle.LifecycleRegistryOwner;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import dagger.android.support.DaggerAppCompatActivity;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends DaggerAppCompatActivity implements LifecycleRegistryOwner {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
+    private LifecycleRegistry registry;
+
+    @Override
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        registry = new LifecycleRegistry(this);
+    }
 
     @Override
     protected void onStart() {
@@ -26,12 +36,17 @@ public abstract class BaseActivity extends AppCompatActivity {
         bindObservables();
     }
 
-    abstract void bindObservables();
+    protected abstract void bindObservables();
 
     @Override
     protected void onStop() {
         super.onStop();
         disposables.clear();
+    }
+
+    @Override
+    public LifecycleRegistry getLifecycle() {
+        return registry;
     }
 
     protected final void addToLifecycle(@NonNull final Disposable disposable) {

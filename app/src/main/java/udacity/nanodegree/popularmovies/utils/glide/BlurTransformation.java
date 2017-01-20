@@ -24,14 +24,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.os.Build;
 import android.renderscript.RSRuntimeException;
+import android.support.annotation.NonNull;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapResource;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -39,79 +36,46 @@ import java.security.MessageDigest;
 import jp.wasabeef.glide.transformations.internal.FastBlur;
 import jp.wasabeef.glide.transformations.internal.RSBlur;
 
-public class BlurTransformation implements Transformation<Bitmap> {
+public class BlurTransformation extends BitmapTransformation {
 
     private static int    VERSION  = 1;
     private static String ID       = BlurTransformation.class.getCanonicalName() + VERSION;
     private static byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-    private static int MAX_RADIUS            = 25;
-    private static int DEFAULT_DOWN_SAMPLING = 1;
+    private final Context context;
+    private final int     radius;
 
-    private Context    mContext;
-    private BitmapPool mBitmapPool;
-
-    private int mRadius;
-    private int mSampling;
-
-    public BlurTransformation(Context context) {
-        this(context, Glide.get(context).getBitmapPool(), MAX_RADIUS, DEFAULT_DOWN_SAMPLING);
-    }
-
-    public BlurTransformation(Context context, BitmapPool pool) {
-        this(context, pool, MAX_RADIUS, DEFAULT_DOWN_SAMPLING);
-    }
-
-    public BlurTransformation(Context context, BitmapPool pool, int radius) {
-        this(context, pool, radius, DEFAULT_DOWN_SAMPLING);
-    }
 
     public BlurTransformation(Context context, int radius) {
-        this(context, Glide.get(context).getBitmapPool(), radius, DEFAULT_DOWN_SAMPLING);
-    }
-
-    public BlurTransformation(Context context, int radius, int sampling) {
-        this(context, Glide.get(context).getBitmapPool(), radius, sampling);
-    }
-
-    public BlurTransformation(Context context, BitmapPool pool, int radius, int sampling) {
-        mContext = context.getApplicationContext();
-        mBitmapPool = pool;
-        mRadius = radius;
-        mSampling = sampling;
+        this.context = context.getApplicationContext();
+        this.radius = radius;
     }
 
     @Override
-    public Resource<Bitmap> transform(final Resource<Bitmap> resource,
-                                      final int outWidth,
-                                      final int outHeight) {
+    protected Bitmap transform(@NonNull
+                               final BitmapPool pool,
+                               @NonNull
+                               final Bitmap toTransform,
+                               final int outWidth,
+                               final int outHeight) {
 
-        Bitmap source = resource.get();
+        int width = toTransform.getWidth();
+        int height = toTransform.getHeight();
 
-        int width = source.getWidth();
-        int height = source.getHeight();
-        int scaledWidth = width / mSampling;
-        int scaledHeight = height / mSampling;
-
-        Bitmap bitmap = mBitmapPool.get(scaledWidth, scaledHeight, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = pool.get(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        canvas.scale(1 / (float) mSampling, 1 / (float) mSampling);
+        canvas.scale(1, 1);
         Paint paint = new Paint();
         paint.setFlags(Paint.FILTER_BITMAP_FLAG);
-        canvas.drawBitmap(source, 0, 0, paint);
+        canvas.drawBitmap(toTransform, 0, 0, paint);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            try {
-                bitmap = RSBlur.blur(mContext, bitmap, mRadius);
-            }
-            catch (RSRuntimeException e) {
-                bitmap = FastBlur.blur(bitmap, mRadius, true);
-            }
-        } else {
-            bitmap = FastBlur.blur(bitmap, mRadius, true);
+        try {
+            bitmap = RSBlur.blur(context, bitmap, radius);
+        } catch (RSRuntimeException e) {
+            bitmap = FastBlur.blur(bitmap, radius, true);
         }
 
-        return BitmapResource.obtain(bitmap, mBitmapPool);
+        return bitmap;
     }
 
     @Override
@@ -119,10 +83,7 @@ public class BlurTransformation implements Transformation<Bitmap> {
 
         messageDigest.update(ID_BYTES);
 
-        final byte[] radiusData = ByteBuffer.allocate(4).putInt(mRadius).array();
+        final byte[] radiusData = ByteBuffer.allocate(4).putInt(radius).array();
         messageDigest.update(radiusData);
-
-        final byte[] samplingData = ByteBuffer.allocate(4).putInt(mSampling).array();
-        messageDigest.update(samplingData);
     }
 }

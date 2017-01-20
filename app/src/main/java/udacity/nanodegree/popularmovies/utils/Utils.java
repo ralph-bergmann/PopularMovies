@@ -12,9 +12,8 @@ import android.support.v7.graphics.Palette;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import udacity.nanodegree.popularmovies.api.models.ConfigurationResponse;
-import udacity.nanodegree.popularmovies.api.models.MoviesResponse;
-import udacity.nanodegree.popularmovies.utils.glide.BackdropImage;
+import udacity.nanodegree.popularmovies.model.Movie;
+import udacity.nanodegree.popularmovies.model.PosterSize;
 
 public class Utils {
 
@@ -90,37 +89,39 @@ public class Utils {
         return Color.HSVToColor(hsv);
     }
 
-    public static String urlFor(@NonNull final MoviesResponse.Movie movie,
+    public static String urlFor(@NonNull final Movie movie,
                                 final int width,
-                                @NonNull final ConfigurationResponse.ImageConfiguration imageConfiguration) {
+                                @NonNull final String secureBaseUrl,
+                                @NonNull final List<PosterSize> posterSizes) {
 
-        return Uri.parse(imageConfiguration.secureBaseUrl).buildUpon()
-                  .appendPath(fileSize(width, imageConfiguration.posterSizes))
+        return Uri.parse(secureBaseUrl).buildUpon()
+                  .appendPath(fileSize(width, posterSizes))
                   .appendPath(movie.posterPath.substring(1)) // remove leading /
                   .build()
                   .toString();
     }
 
-    public static String urlFor(@NonNull final BackdropImage image,
-                                final int width,
-                                @NonNull final ConfigurationResponse.ImageConfiguration imageConfiguration) {
-
-        return Uri.parse(imageConfiguration.secureBaseUrl).buildUpon()
-                  .appendPath(fileSize(width, imageConfiguration.posterSizes))
-                  .appendPath(image.path.substring(1)) // remove leading /
-                  .build()
-                  .toString();
-    }
+//    public static String urlFor(@NonNull final BackdropImage image,
+//                                final int width,
+//                                @NonNull final ImageConfig imageConfig) {
+//
+//        return Uri.parse(imageConfig.secureBaseUrl).buildUpon()
+//                  .appendPath(fileSize(width, imageConfig.posterSizes))
+//                  .appendPath(image.path.substring(1)) // remove leading /
+//                  .build()
+//                  .toString();
+//    }
 
     @VisibleForTesting
-    static String fileSize(final int width, final List<String> sizes) {
+    static String fileSize(final int width, final List<PosterSize> sizes) {
 
         int min = Integer.MAX_VALUE;
-        for (String size : sizes) {
-            if (!PATTERN.matcher(size).matches()) {
+        for (PosterSize size : sizes) {
+            final String tmp = size.size;
+            if (!PATTERN.matcher(tmp).matches()) {
                 continue;
             }
-            final int value = Integer.valueOf(size.substring(1));
+            final int value = Integer.valueOf(tmp.substring(1));
             if (Math.abs(value - width) < Math.abs(min - width)) {
                 min = value;
             }

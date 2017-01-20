@@ -1,11 +1,13 @@
 package udacity.nanodegree.popularmovies.utils;
 
 import android.app.Activity;
+import android.content.res.ColorStateList;
 import android.databinding.BindingAdapter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,7 +17,7 @@ import com.bumptech.glide.request.target.ImageViewTarget;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 
-import udacity.nanodegree.popularmovies.api.models.MoviesResponse;
+import udacity.nanodegree.popularmovies.model.Movie;
 import udacity.nanodegree.popularmovies.utils.glide.BackdropImage;
 import udacity.nanodegree.popularmovies.utils.glide.GlideRequestBuilder;
 import udacity.nanodegree.popularmovies.utils.glide.PaletteBitmap;
@@ -25,9 +27,9 @@ import static udacity.nanodegree.popularmovies.utils.Utils.colorForeground;
 
 public class DataBindingAdapters {
 
-    @BindingAdapter({"bind:imageUrl", "bind:activity"})
+    @BindingAdapter({"imageUrl", "activity"})
     public static void setImageUrl(ImageView imageView,
-                                   MoviesResponse.Movie movie,
+                                   Movie movie,
                                    Activity activity) {
         GlideRequestBuilder.fullRequest(activity)
                            .load(movie)
@@ -41,9 +43,9 @@ public class DataBindingAdapters {
                            });
     }
 
-    @BindingAdapter({"bind:imageUrlPalette", "bind:activity"})
+    @BindingAdapter({"imageUrlPalette", "activity"})
     public static void setImageUrlPalette(ImageView imageView,
-                                          MoviesResponse.Movie movie,
+                                          Movie movie,
                                           Activity activity) {
         GlideRequestBuilder.fullRequestPalette(activity)
                            .load(movie)
@@ -62,9 +64,9 @@ public class DataBindingAdapters {
                            });
     }
 
-    @BindingAdapter({"bind:backgroundUrl", "bind:activity"})
+    @BindingAdapter({"backgroundUrl", "activity"})
     public static void setBackgroundUrl(View view,
-                                        MoviesResponse.Movie movie,
+                                        Movie movie,
                                         Activity activity) {
         view.setBackgroundColor(movie.colorBackground.get());
         GlideRequestBuilder.blurRequest(activity)
@@ -80,7 +82,7 @@ public class DataBindingAdapters {
                            });
     }
 
-    @BindingAdapter({"bind:contentScrim", "bind:activity"})
+    @BindingAdapter({"contentScrim", "activity"})
     public static void setContentScrim(CollapsingToolbarLayout view,
                                        String path,
                                        Activity activity) {
@@ -95,6 +97,11 @@ public class DataBindingAdapters {
                                    view.setContentScrim(new BitmapDrawable(resource));
                                }
                            });
+    }
+
+    @BindingAdapter("fabTint")
+    public static void setFabTint(FloatingActionButton fab, int color) {
+        fab.setBackgroundTintList(ColorStateList.valueOf(color));
     }
 
     @BindingAdapter("ratingStarTint")

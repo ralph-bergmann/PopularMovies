@@ -1,9 +1,10 @@
 package udacity.nanodegree.popularmovies.adapter;
 
 import android.app.Activity;
-import android.support.v7.util.SortedList;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.util.SortedListAdapterCallback;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -14,45 +15,68 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
-import udacity.nanodegree.popularmovies.api.models.MoviesResponse.Movie;
+import timber.log.Timber;
 import udacity.nanodegree.popularmovies.databinding.ItemMovieBinding;
-import udacity.nanodegree.popularmovies.ui.MainActivity;
+import udacity.nanodegree.popularmovies.model.Movie;
 import udacity.nanodegree.popularmovies.utils.glide.PaletteBitmap;
-
-import static udacity.nanodegree.popularmovies.ui.MainActivity.SORTORDER_MOST_POPULAR;
-import static udacity.nanodegree.popularmovies.ui.MainActivity.SORTORDER_TOP_RATED;
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MovieViewHolder>
     implements ListPreloader.PreloadModelProvider<Movie> {
 
-    private final MainAdapterCallback           adapterCallback;
-    private final SortedList<Movie>             data;
-    private final Activity                      activity;
-    private final ClickHandler                  clickHandler;
-    private final RequestBuilder<PaletteBitmap> preloadRequest;
+    private final     Activity                      activity;
+    private final     ClickHandler                  clickHandler;
+    private final     RequestBuilder<PaletteBitmap> preloadRequest;
+    @Nullable private List<Movie>                   data;
 
     public MainAdapter(final Activity activity,
                        final OnMovieInteractionListener listener,
                        final RequestBuilder<PaletteBitmap> preloadRequest) {
 
-        this.adapterCallback = new MainAdapterCallback(this);
-        this.data = new SortedList<>(Movie.class, adapterCallback);
         this.activity = activity;
         this.clickHandler = new ClickHandler(listener);
         this.preloadRequest = preloadRequest;
         setHasStableIds(true);
     }
 
-    public void addMovies(final List<Movie> movies) {
-        data.addAll(movies);
-    }
-
-    public void clear() {
-        data.clear();
-    }
-
-    public void setSortOrder(@MainActivity.SortOrder final int sortOrder) {
-        adapterCallback.setSortOrder(sortOrder);
+    public void setMovies(@NonNull final List<Movie> movies) {
+        Timber.i("setMovies movies: %,d",movies.size());
+//        if (data != null) {
+//
+//            final List<Movie> newData = new ArrayList<>(data);
+//            newData.addAll(movies);
+//
+//            final DiffUtil.DiffResult diffResult =
+//                DiffUtil.calculateDiff(new MovieDiffUtilCallback(data, newData));
+//
+//            data = newData;
+//            diffResult.dispatchUpdatesTo(this);
+//            diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
+//
+//                @Override
+//                public void onInserted(final int i, final int i1) {
+//
+//                }
+//
+//                @Override
+//                public void onRemoved(final int i, final int i1) {
+//
+//                }
+//
+//                @Override
+//                public void onMoved(final int i, final int i1) {
+//
+//                }
+//
+//                @Override
+//                public void onChanged(final int i, final int i1, final Object o) {
+//
+//                }
+//            });
+//
+//        } else {
+            data = movies;
+            notifyDataSetChanged();
+//        }
     }
 
     @Override
@@ -71,12 +95,12 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MovieViewHolde
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return data == null ? 0 : data.size();
     }
 
     @Override
     public long getItemId(final int position) {
-        return data.get(position).id;
+        return data == null ? -1 : data.get(position).id;
     }
 
     //
@@ -105,40 +129,47 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MovieViewHolde
     }
 
 
-    private static class MainAdapterCallback extends SortedListAdapterCallback<Movie> {
+    private static class MovieDiffUtilCallback extends DiffUtil.Callback {
 
-        private int sortOrder;
+        @NonNull private final List<Movie> oldList;
+        @NonNull private final List<Movie> newList;
 
-        MainAdapterCallback(final RecyclerView.Adapter adapter) {
-            super(adapter);
+        MovieDiffUtilCallback(@NonNull final List<Movie> oldList,
+                              @NonNull final List<Movie> newList) {
+            this.oldList = oldList;
+            this.newList = newList;
         }
 
         @Override
-        public int compare(final Movie o1, final Movie o2) {
-            switch (sortOrder) {
-                case SORTORDER_TOP_RATED:
-                    return Float.compare(o2.voteAverage, o1.voteAverage);
-                case SORTORDER_MOST_POPULAR:
-                default:
-                    return Double.compare(o2.popularity, o1.popularity);
-            }
+        public int getOldListSize() {
+            return oldList.size();
         }
 
         @Override
-        public boolean areContentsTheSame(final Movie oldItem, final Movie newItem) {
+        public int getNewListSize() {
+            return newList.size();
+        }
+
+        @Override
+        public boolean areItemsTheSame(final int oldItemPosition, final int newItemPosition) {
+            return areItemsTheSame(oldList.get(oldItemPosition), newList.get(newItemPosition));
+        }
+
+        private static boolean areItemsTheSame(final Movie oldItem,
+                                               final Movie newItem) {
             return oldItem.id == newItem.id;
         }
 
         @Override
-        public boolean areItemsTheSame(final Movie item1, final Movie item2) {
-            return item1.id == item2.id;
+        public boolean areContentsTheSame(final int oldItemPosition, final int newItemPosition) {
+            return areContentsTheSame(oldList.get(oldItemPosition), newList.get(newItemPosition));
         }
 
-        public void setSortOrder(@MainActivity.SortOrder final int sortOrder) {
-            this.sortOrder = sortOrder;
+        private static boolean areContentsTheSame(final Movie oldItem,
+                                                  final Movie newItem) {
+            return oldItem.id == newItem.id;
         }
     }
-
 
     public static class ClickHandler {
 
