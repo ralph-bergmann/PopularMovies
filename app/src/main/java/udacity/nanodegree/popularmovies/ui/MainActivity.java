@@ -71,6 +71,7 @@ public class MainActivity extends BaseActivity implements MainAdapter.OnMovieInt
 
     // data
     private BehaviorProcessor<Integer>                 loadSubject            = BehaviorProcessor.create();
+    private BehaviorProcessor<Integer>                 sortSubject            = BehaviorProcessor.create();
     private BehaviorProcessor<Boolean>                 loadingSubject         = BehaviorProcessor.create();
     private PublishProcessor<Response<MoviesResponse>> dataApiResponseSubject = PublishProcessor.create();
     private PublishProcessor<MoviesResponse>           dataSubject            = PublishProcessor.create();
@@ -87,9 +88,6 @@ public class MainActivity extends BaseActivity implements MainAdapter.OnMovieInt
     public @interface SortOrder {}
     public static final int SORTORDER_MOST_POPULAR = 0;
     public static final int SORTORDER_TOP_RATED    = 1;
-
-    @SortOrder
-    private int sortOrder = SORTORDER_MOST_POPULAR; // has to be in sync with menu_main.xml
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,8 +107,6 @@ public class MainActivity extends BaseActivity implements MainAdapter.OnMovieInt
         recyclerView.setLayoutManager(layoutManager);
 
         adapter = new MainAdapter(this, this, GlideRequestBuilder.preloadRequest(this));
-        adapter.setSortOrder(sortOrder);
-
         recyclerView.setAdapter(adapter);
 
         final FixedPreloadSizeProvider<Movie> preloadSizeProvider = new FixedPreloadSizeProvider<>(50, 75);
@@ -164,20 +160,12 @@ public class MainActivity extends BaseActivity implements MainAdapter.OnMovieInt
         // switch sort order
         switch (item.getItemId()) {
             case R.id.most_popular:
-                sortOrder = SORTORDER_MOST_POPULAR;
+                sortSubject.onNext(SORTORDER_MOST_POPULAR);
                 break;
             case R.id.top_rated:
-                sortOrder = SORTORDER_TOP_RATED;
+                sortSubject.onNext(SORTORDER_TOP_RATED);
                 break;
         }
-
-        // clear adapter
-        adapter.clear();
-        adapter.setSortOrder(sortOrder);
-
-        // start new loading
-        totalPages = 1;
-        loadSubject.onNext(1);
 
         // set menu item
         item.setChecked(true);
@@ -255,37 +243,61 @@ public class MainActivity extends BaseActivity implements MainAdapter.OnMovieInt
         // movies
         //
 
+        // load data
+        // create a Pair with
+        // 1st item: page to load
+        // 2nd item: sort order
+        addToLifecycle(loadSubject.withLatestFrom(sortSubject, Pair::create)
+                                  .distinctUntilChanged()
+                                  .filter(pair -> pair.first <= totalPages)
+                                  .flatMap(pair -> {
+                                      loadingSubject.onNext(true);
+
+                                      switch (pair.second) {
+                                          case SORTORDER_TOP_RATED:
+                                              return api.toprated(pair.first)
+                                                        .subscribeOn(Schedulers.io())
+                                                        .observeOn(AndroidSchedulers.mainThread())
+                                                        .doOnComplete(() -> loadingSubject.onNext(
+                                                            false));
+                                          case SORTORDER_MOST_POPULAR:
+                                          default:
+                                              return api.popular(pair.first)
+                                                        .subscribeOn(Schedulers.io())
+                                                        .observeOn(AndroidSchedulers.mainThread())
+                                                        .doOnComplete(() -> loadingSubject.onNext(
+                                                            false));
+                                      }
+                                  })
+                                  .subscribe(response -> dataApiResponseSubject.onNext(response),
+                                             error -> Timber.e(error, "bindObservables: ")));
+
+        // reset adapter etc and start loading from page 1 if sort order changes
+        addToLifecycle(sortSubject
+                           .distinctUntilChanged()
+                           .subscribe(order -> {
+
+                                          // reset adapter
+                                          adapter.clear();
+                                          adapter.setSortOrder(order);
+
+                                          // reset total pages
+                                          totalPages = 1;
+
+                                          // start load from page 1
+                                          loadSubject.onNext(1);
+                                      },
+                                      error -> Timber.e(error, "bindObservables: ")));
+
         // start loading if we have both configuration and genres
         addToLifecycle(Flowable.combineLatest(configurationResponseSubject,
                                               genresResponseSubject,
                                               Pair::create)
                                .filter(pair -> pair.first != null && pair.second != null)
-                               .subscribe(pair -> loadSubject.onNext(1),
+                               .subscribe(pair -> {
+                                              sortSubject.onNext(SORTORDER_MOST_POPULAR); // has to be in sync with menu_main.xml
+                                          },
                                           error -> Timber.e(error, "bindObservables: ")));
-
-        // load data
-        addToLifecycle(loadSubject
-                           .distinctUntilChanged()
-                           .filter(page -> page <= totalPages)
-                           .flatMap(page -> {
-                               loadingSubject.onNext(true);
-
-                               switch (sortOrder) {
-                                   case SORTORDER_TOP_RATED:
-                                       return api.toprated(page)
-                                                 .subscribeOn(Schedulers.io())
-                                                 .observeOn(AndroidSchedulers.mainThread())
-                                                 .doOnComplete(() -> loadingSubject.onNext(false));
-                                   case SORTORDER_MOST_POPULAR:
-                                   default:
-                                       return api.popular(page)
-                                                 .subscribeOn(Schedulers.io())
-                                                 .observeOn(AndroidSchedulers.mainThread())
-                                                 .doOnComplete(() -> loadingSubject.onNext(false));
-                               }
-                           })
-                           .subscribe(response -> dataApiResponseSubject.onNext(response),
-                                      error -> Timber.e(error, "bindObservables: ")));
 
         // show loading state
         addToLifecycle(loadingSubject
@@ -385,7 +397,9 @@ public class MainActivity extends BaseActivity implements MainAdapter.OnMovieInt
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     if (!isDisposed()) {
-                        if (layoutManager.findLastVisibleItemPosition() > adapter.getItemCount() - 10) {
+                        if (adapter.getItemCount() > 0 &&
+                            layoutManager.findLastVisibleItemPosition() > adapter.getItemCount() - 10) {
+
                             observer.onNext(dy);
                         }
                     }
